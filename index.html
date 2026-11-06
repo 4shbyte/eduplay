@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduPlay - Explore, Learn & Play</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#" data-page="home"><span class="brand-icon">✦</span> EduPlay</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Buka menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link active" href="#" data-page="home">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-page="materials">Materi</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-page="games">Permainan</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-page="profile">Profil</a></li>
+        </ul>
+        <span class="score-pill ms-lg-3">⭐ <span id="navScore">0</span> poin</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4 py-lg-5">
+    <!-- HOME -->
+    <section id="homePage" class="page-section">
+      <div class="hero row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="eyebrow">BELAJAR JADI LEBIH SERU</span>
+          <h1 class="display-4 fw-bold mt-3">Jelajahi hal baru,<br><span class="text-purple">sambil bermain!</span></h1>
+          <p class="lead text-muted mt-3">Temukan pengetahuan menarik dan uji kemampuanmu melalui permainan edukatif di EduPlay.</p>
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button class="btn btn-primary btn-lg" data-go="materials">Mulai Belajar</button>
+            <button class="btn btn-outline-primary btn-lg" data-go="games">Main Sekarang</button>
+          </div>
+          <p class="small text-muted mt-3 mb-0">📱 Bisa dibuka melalui HP maupun laptop.</p>
+        </div>
+        <div class="col-lg-5">
+          <div class="hero-art">
+            <div class="float-icon icon-book">📚</div>
+            <div class="float-icon icon-star">⭐</div>
+            <div class="float-icon icon-bulb">💡</div>
+            <div class="hero-circle">🧠</div>
+            <div class="art-caption">Belajar • Bermain • Bertumbuh</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-heading mt-5">
+        <div><span class="eyebrow">MULAI DARI SINI</span><h2 class="fw-bold mt-1">Apa yang ingin kamu pelajari?</h2></div>
+        <a href="#" class="text-link" data-page="materials">Lihat semua →</a>
+      </div>
+      <div class="row g-3 mt-2" id="homeCategories"></div>
+
+      <div class="promo-card mt-5">
+        <div><span class="eyebrow text-white-50">WAKTUNYA UJI DIRI</span><h2 class="fw-bold mt-2">Seberapa luas pengetahuanmu?</h2><p class="mb-0 text-white-50">Coba tantangan singkat dan kumpulkan poinmu.</p></div>
+        <button class="btn btn-light mt-3 mt-md-0" data-go="games">Jelajahi Permainan →</button>
+      </div>
+    </section>
+
+    <!-- MATERIALS -->
+    <section id="materialsPage" class="page-section d-none">
+      <div class="page-title"><span class="eyebrow">TAMBAH PENGETAHUAN</span><h1 class="fw-bold">Materi Pembelajaran</h1><p class="text-muted">Pilih topik yang menarik untukmu.</p></div>
+      <div class="row g-3" id="materialsList"></div>
+      <div id="materialDetail" class="material-detail d-none mt-4"></div>
+    </section>
+
+    <!-- GAMES -->
+    <section id="gamesPage" class="page-section d-none">
+      <div class="page-title"><span class="eyebrow">BELAJAR SAMBIL BERMAIN</span><h1 class="fw-bold">Pilih Permainan</h1><p class="text-muted">Selesaikan tantangan dan kumpulkan poin.</p></div>
+      <div class="row g-3" id="gamesList">
+        <div class="col-md-6"><article class="game-card"><div class="game-emoji">🧠</div><div><h3>Quiz Challenge</h3><p>Jawab pertanyaan pilihan ganda.</p><button class="btn btn-primary" data-game="quiz">Mainkan</button></div></article></div>
+        <div class="col-md-6"><article class="game-card"><div class="game-emoji">🔎</div><div><h3>Tebak Kata</h3><p>Tebak jawaban dari petunjuk yang tersedia.</p><button class="btn btn-primary" data-game="guess">Mainkan</button></div></article></div>
+        <div class="col-md-6"><article class="game-card"><div class="game-emoji">🧩</div><div><h3>Cocokkan Pasangan</h3><p>Temukan pasangan istilah dan artinya.</p><button class="btn btn-primary" data-game="match">Mainkan</button></div></article></div>
+        <div class="col-md-6"><article class="game-card"><div class="game-emoji">🔤</div><div><h3>Susun Kata</h3><p>Susun huruf acak menjadi kata yang benar.</p><button class="btn btn-primary" data-game="scramble">Mainkan</button></div></article></div>
+      </div>
+      <div id="gameArea" class="game-area d-none mt-4"></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="profilePage" class="page-section d-none">
+      <div class="page-title"><span class="eyebrow">AREA PEMAIN</span><h1 class="fw-bold">Profil Saya</h1><p class="text-muted">Atur nama dan lihat poin yang sudah kamu kumpulkan.</p></div>
+      <div class="profile-card">
+        <div class="profile-avatar">😊</div>
+        <label for="playerName" class="form-label fw-semibold">Nama panggilan</label>
+        <input id="playerName" class="form-control mb-3" maxlength="20" placeholder="Masukkan nama panggilan">
+        <button id="saveName" class="btn btn-primary">Simpan Nama</button>
+        <hr>
+        <div class="d-flex justify-content-between"><span>Total poin</span><strong id="profileScore">0 ⭐</strong></div>
+        <button id="resetScore" class="btn btn-outline-danger btn-sm mt-3">Reset poin</button>
+        <p class="small text-muted mt-3 mb-0">Data tersimpan di browser perangkat ini.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center py-4 mt-5">
+    <strong>✦ EduPlay</strong><p class="small text-muted mb-0">Explore, Learn & Play · Belajar jadi lebih menyenangkan.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
