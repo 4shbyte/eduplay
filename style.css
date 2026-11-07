@@ -137,3 +137,93 @@
     padding: 10px 13px;
   }
 }
+
+
+/* =================================
+   FIX TAMPILAN CAREER RESULTS
+================================= */
+
+/* Mencegah halaman melebar ke samping */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#careerResults {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#careerResults .row {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#careerResults .row > div {
+  min-width: 0;
+}
+
+/* Memperbaiki susunan isi kartu */
+#careerResults .game-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 24px;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+/* Emoji */
+#careerResults .game-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+  border-radius: 24px;
+  background: #f0edff;
+  font-size: 2.5rem;
+}
+
+/* Judul dan deskripsi */
+#careerResults .game-card h4,
+#careerResults .game-card h6,
+#careerResults .game-card p,
+#careerResults .game-card ul,
+#careerResults .game-card .eyebrow {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+#careerResults .game-card ul {
+  padding-left: 22px;
+}
+
+#careerResults .game-card .fact-box {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Tampilan HP */
+@media (max-width: 767px) {
+  #careerResults .row > div {
+    width: 100%;
+  }
+
+  #careerResults .game-card {
+    padding: 20px;
+  }
+}
+
