@@ -1,8 +1,3 @@
-
-// ==========================================
-// EDUPLAY - PERSONALITY & SKILL DISCOVERY
-// ==========================================
-
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
@@ -13,6 +8,7 @@ const state = {
   ),
   careerResult: JSON.parse(
     localStorage.getItem("eduplay_career") || "null"
+  )
 };
 
 
