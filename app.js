@@ -1,185 +1,895 @@
-const $ = (s) => document.querySelector(s);
-const $$ = (s) => [...document.querySelectorAll(s)];
+
+// ==========================================
+// EDUPLAY - PERSONALITY & SKILL DISCOVERY
+// ==========================================
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
 const state = {
   name: localStorage.getItem("eduplay_name") || "",
-  score: Number(localStorage.getItem("eduplay_score") || 0),
-  game: null
+  personalityResult: JSON.parse(
+    localStorage.getItem("eduplay_personality") || "null"
+  ),
+  careerResult: JSON.parse(
+    localStorage.getItem("eduplay_career") || "null"
 };
 
-const categories = [
-  {icon:"🔬",name:"Sains",desc:"Kenali alam dan cara kerja dunia.",color:"#e6f7ef"},
-  {icon:"🌏",name:"Geografi",desc:"Jelajahi negara dan tempat menarik.",color:"#e6f2ff"},
-  {icon:"📜",name:"Sejarah",desc:"Kenali peristiwa dan tokoh penting.",color:"#fff2dc"},
-  {icon:"💻",name:"Teknologi",desc:"Pelajari teknologi di sekitar kita.",color:"#f0eaff"},
-  {icon:"✨",name:"Pengetahuan Umum",desc:"Temukan fakta unik setiap hari.",color:"#ffeaf2"}
-];
-const materials = [
- {id:1,cat:"Sains",icon:"🪐",title:"Mengenal Tata Surya",desc:"Kenali Matahari dan planet-planet yang mengitarinya.",body:"Tata Surya adalah kumpulan benda langit dengan Matahari sebagai pusatnya. Ada delapan planet yang mengelilingi Matahari, yaitu Merkurius, Venus, Bumi, Mars, Jupiter, Saturnus, Uranus, dan Neptunus.",fact:"Jupiter adalah planet terbesar di Tata Surya."},
- {id:2,cat:"Sains",icon:"🫀",title:"Mengenal Organ Tubuh",desc:"Tubuh manusia memiliki organ dengan fungsi berbeda.",body:"Tubuh manusia memiliki berbagai organ. Jantung memompa darah, paru-paru membantu proses pernapasan, dan otak mengatur banyak aktivitas tubuh.",fact:"Jantung bekerja memompa darah ke seluruh tubuh."},
- {id:3,cat:"Geografi",icon:"🌍",title:"Benua di Dunia",desc:"Pelajari pembagian wilayah daratan di Bumi.",body:"Secara umum, dunia dibagi menjadi tujuh benua: Asia, Afrika, Amerika Utara, Amerika Selatan, Antarktika, Eropa, dan Australia.",fact:"Asia adalah benua dengan jumlah penduduk terbanyak."},
- {id:4,cat:"Sejarah",icon:"🇮🇩",title:"Proklamasi Indonesia",desc:"Mengenal peristiwa penting pada 17 Agustus 1945.",body:"Indonesia memproklamasikan kemerdekaan pada 17 Agustus 1945. Proklamasi dibacakan oleh Soekarno didampingi Mohammad Hatta di Jakarta.",fact:"Naskah proklamasi diketik oleh Sayuti Melik."},
- {id:5,cat:"Teknologi",icon:"🌐",title:"Apa Itu Internet?",desc:"Kenali jaringan yang menghubungkan perangkat di dunia.",body:"Internet adalah jaringan komputer global yang memungkinkan perangkat saling bertukar informasi. Internet digunakan untuk belajar, berkomunikasi, mencari informasi, dan banyak hal lainnya.",fact:"World Wide Web dan internet adalah dua hal yang berbeda."},
- {id:6,cat:"Pengetahuan Umum",icon:"🐙",title:"Fakta Unik Hewan",desc:"Temukan fakta menarik dari dunia hewan.",body:"Hewan memiliki kemampuan yang beragam. Gurita memiliki tiga jantung, gajah menggunakan belalainya untuk mengambil makanan dan air, sedangkan kelelawar menggunakan ekolokasi untuk membantu navigasi.",fact:"Gurita memiliki tiga jantung."}
-];
 
-function updateScore(){
-  $("#navScore").textContent=state.score;
-  $("#profileScore").textContent=state.score+" ⭐";
-  $("#playerName").value=state.name;
-  localStorage.setItem("eduplay_score",state.score);
-}
-function addPoints(n){state.score+=n;updateScore();}
-function showPage(page){
-  $$(".page-section").forEach(el=>el.classList.add("d-none"));
-  const target=$("#"+page+"Page"); if(target) target.classList.remove("d-none");
-  $$(".nav-link").forEach(a=>a.classList.toggle("active",a.dataset.page===page));
-  $("#gameArea").classList.add("d-none");
-  $("#materialDetail").classList.add("d-none");
-  const menu=$("#navMenu"); if(menu.classList.contains("show")) bootstrap.Collapse.getOrCreateInstance(menu).hide();
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-document.addEventListener("click",e=>{
-  const pageLink=e.target.closest("[data-page]");
-  const go=e.target.closest("[data-go]");
-  if(pageLink){e.preventDefault();showPage(pageLink.dataset.page);}
-  if(go)showPage(go.dataset.go);
-});
-function renderCategories(){
-  $("#homeCategories").innerHTML=categories.slice(0,4).map(c=>`<div class="col-6 col-lg-3"><div class="category-card"><div class="category-icon" style="background:${c.color}">${c.icon}</div><h3>${c.name}</h3><p>${c.desc}</p></div></div>`).join("");
-}
-function renderMaterials(){
-  $("#materialsList").innerHTML=materials.map(m=>`<div class="col-md-6 col-lg-4"><article class="material-card" data-material="${m.id}"><div class="material-emoji">${m.icon}</div><span class="eyebrow">${m.cat}</span><h3 class="mt-2">${m.title}</h3><p>${m.desc}</p></article></div>`).join("");
-  $$(".material-card").forEach(card=>card.addEventListener("click",()=>openMaterial(Number(card.dataset.material))));
-}
-function openMaterial(id){
-  const m=materials.find(x=>x.id===id);
-  $("#materialDetail").classList.remove("d-none");
-  $("#materialDetail").innerHTML=`<button class="btn btn-sm btn-outline-primary mb-3" id="backMaterials">← Kembali ke materi</button><div class="material-emoji">${m.icon}</div><span class="eyebrow">${m.cat}</span><h2 class="mt-2">${m.title}</h2><p class="mt-3">${m.body}</p><div class="fact-box">💡 <strong>Fakta menarik:</strong> ${m.fact}</div><button class="btn btn-primary" data-go="games">Uji Pengetahuanmu</button>`;
-  $("#backMaterials").addEventListener("click",()=>$("#materialDetail").classList.add("d-none"));
-  $("#materialDetail").scrollIntoView({behavior:"smooth",block:"start"});
-}
-function gameHeader(title,desc){return `<button class="btn btn-sm btn-outline-primary mb-3" id="backGames">← Semua permainan</button><h2>${title}</h2><p class="text-muted">${desc}</p><div id="gameContent"></div>`;}
-function showGame(name){
-  state.game=name;$("#gameArea").classList.remove("d-none");
-  const titles={quiz:["Quiz Challenge","Pilih jawaban yang paling tepat."],guess:["Tebak Kata","Baca petunjuk dan masukkan jawaban."],match:["Cocokkan Pasangan","Pilih dua kartu yang saling berhubungan."],scramble:["Susun Kata","Susun huruf acak menjadi kata yang benar."]};
-  $("#gameArea").innerHTML=gameHeader(...titles[name]);
-  $("#backGames").addEventListener("click",()=>$("#gameArea").classList.add("d-none"));
-  ({quiz:playQuiz,guess:playGuess,match:playMatch,scramble:playScramble})[name]();
-  $("#gameArea").scrollIntoView({behavior:"smooth",block:"start"});
-}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-game]");if(b)showGame(b.dataset.game);});
+// ==========================================
+// 1. NAVIGASI HALAMAN
+// ==========================================
 
-const quizQuestions=[
- {q:"Planet terbesar di Tata Surya adalah ...",opts:["Bumi","Mars","Jupiter","Venus"],a:"Jupiter",why:"Jupiter adalah planet terbesar di Tata Surya."},
- {q:"Apa ibu kota Indonesia?",opts:["Bandung","Jakarta","Surabaya","Medan"],a:"Jakarta",why:"Jakarta dikenal sebagai ibu kota Indonesia."},
- {q:"Organ yang memompa darah adalah ...",opts:["Paru-paru","Hati","Jantung","Ginjal"],a:"Jantung",why:"Jantung memompa darah ke seluruh tubuh."},
- {q:"Perangkat untuk mengetik pada komputer adalah ...",opts:["Monitor","Keyboard","Speaker","Printer"],a:"Keyboard",why:"Keyboard digunakan untuk memasukkan teks dan perintah."}
-];
-function playQuiz(){
- let i=0,correct=0;
- function render(){
-  const q=quizQuestions[i];
-  $("#gameContent").innerHTML=`<div class="d-flex justify-content-between mb-3"><strong>Pertanyaan ${i+1}/${quizQuestions.length}</strong><strong>Benar: ${correct}</strong></div><div class="progress mb-4" style="height:8px"><div class="progress-bar" style="width:${(i/quizQuestions.length)*100}%;background:#7256d8"></div></div><h4 class="fw-bold">${q.q}</h4><div>${q.opts.map(o=>`<button class="answer-option" data-answer="${o}">${o}</button>`).join("")}</div><div id="quizFeedback" class="feedback"></div><button id="nextQuiz" class="btn btn-primary mt-3 d-none">${i===quizQuestions.length-1?"Selesaikan":"Pertanyaan berikutnya"}</button>`;
-  let answered=false;
-  $$(".answer-option").forEach(b=>b.addEventListener("click",()=>{
-   if(answered)return;answered=true;
-   const ok=b.dataset.answer===q.a;if(ok)correct++;
-   $$(".answer-option").forEach(x=>{x.disabled=true;if(x.dataset.answer===q.a)x.classList.add("selected");});
-   $("#quizFeedback").textContent=(ok?"Benar! 🎉 ":"Belum tepat. ")+q.why;
-   $("#quizFeedback").style.color=ok?"#218653":"#bd5a50";
-   $("#nextQuiz").classList.remove("d-none");
-  }));
-  $("#nextQuiz").addEventListener("click",()=>{
-   if(i<quizQuestions.length-1){i++;render();}
-   else finishGame(correct*10,`Kamu menjawab benar ${correct} dari ${quizQuestions.length} pertanyaan.`);
+function showPage(page) {
+  $$(".page-section").forEach(section => {
+    section.classList.add("d-none");
   });
- }
- render();
-}
-const guessItems=[
- {hint:"Aku adalah planet bercincin yang terkenal.",answer:"SATURNUS"},
- {hint:"Aku adalah bintang yang menjadi pusat Tata Surya.",answer:"MATAHARI"},
- {hint:"Aku adalah alat untuk mengetik pada komputer.",answer:"KEYBOARD"}
-];
-function playGuess(){
- let i=0,correct=0;
- function render(){
-  const item=guessItems[i];
-  $("#gameContent").innerHTML=`<p><strong>Tantangan ${i+1}/${guessItems.length}</strong></p><div class="fact-box fs-5">💡 ${item.hint}</div><label class="form-label fw-bold" for="guessInput">Jawabanmu</label><input id="guessInput" class="form-control" placeholder="Ketik jawaban..." autocomplete="off"><div id="guessFeedback" class="feedback"></div><button id="checkGuess" class="btn btn-primary mt-3">Periksa Jawaban</button><button id="nextGuess" class="btn btn-outline-primary mt-3 ms-2 d-none">Lanjut</button>`;
-  $("#checkGuess").addEventListener("click",()=>{
-   const val=$("#guessInput").value.trim().toUpperCase();
-   if(!val){$("#guessFeedback").textContent="Isi jawaban terlebih dahulu.";return;}
-   const ok=val===item.answer;if(ok)correct++;
-   $("#guessFeedback").textContent=ok?"Tepat sekali! 🎉":`Belum tepat. Jawabannya: ${item.answer}`;
-   $("#guessFeedback").style.color=ok?"#218653":"#bd5a50";
-   $("#checkGuess").disabled=true;$("#nextGuess").classList.remove("d-none");
-  });
-  $("#nextGuess").addEventListener("click",()=>{if(i<guessItems.length-1){i++;render();}else finishGame(correct*10,`Kamu berhasil menebak ${correct} dari ${guessItems.length} kata.`);});
- }
- render();
-}
-const matchPairs=[["Jakarta","Ibu kota Indonesia"],["Matahari","Pusat Tata Surya"],["H2O","Air"],["Keyboard","Alat untuk mengetik"]];
-function playMatch(){
- let selected=[],matched=[],moves=0;
- const cards=matchPairs.flatMap((p,i)=>[{id:i,side:0,text:p[0]},{id:i,side:1,text:p[1]}]).sort(()=>Math.random()-.5);
- $("#gameContent").innerHTML=`<p class="text-muted">Pilih satu kartu istilah, lalu pilih kartu pasangannya.</p><div class="pair-grid" id="pairGrid">${cards.map((c,i)=>`<button class="pair-card" data-index="${i}">${c.text}</button>`).join("")}</div><div id="pairFeedback" class="feedback"></div>`;
- $$(".pair-card").forEach(btn=>btn.addEventListener("click",()=>{
-  const idx=Number(btn.dataset.index),card=cards[idx];
-  if(matched.includes(card.id)||selected.some(x=>x.idx===idx)||selected.length===2)return;
-  btn.classList.add("selected");selected.push({idx,id:card.id,side:card.side}); 
-  if(selected.length===2){
-   moves++;
-   const [a,b]=selected;
-   if(a.id===b.id&&a.side!==b.side){
-    matched.push(a.id);
-    [a.idx,b.idx].forEach(n=>{$(`[data-index="${n}"]`).classList.remove("selected");$(`[data-index="${n}"]`).classList.add("done");$(`[data-index="${n}"]`).disabled=true;});
-    $("#pairFeedback").textContent=`Pasangan cocok! (${matched.length}/${matchPairs.length})`;
-    selected=[];
-    if(matched.length===matchPairs.length)setTimeout(()=>finishGame(Math.max(5,40-(moves-matchPairs.length)*5),`Semua pasangan berhasil ditemukan dalam ${moves} langkah.`),500);
-   }else{
-    $("#pairFeedback").textContent="Belum cocok. Coba pasangan lain.";
-    setTimeout(()=>{selected.forEach(x=>$(`[data-index="${x.idx}"]`).classList.remove("selected"));selected=[];},700);
-   }
+
+  const target = $("#" + page + "Page");
+
+  if (target) {
+    target.classList.remove("d-none");
   }
- }));
-}
-const scrambleWords=[{word:"PLANET",hint:"Benda langit yang mengelilingi bintang."},{word:"KOMPUTER",hint:"Perangkat elektronik untuk mengolah data."},{word:"SEJARAH",hint:"Ilmu yang mempelajari peristiwa masa lalu."}];
-function playScramble(){
- let i=0,correct=0,chosen=[];
- function render(){
-  const item=scrambleWords[i],letters=item.word.split("").map((l,n)=>({l,n})).sort(()=>Math.random()-.5);
-  chosen=[];
-  $("#gameContent").innerHTML=`<p><strong>Kata ${i+1}/${scrambleWords.length}</strong></p><div class="fact-box">💡 ${item.hint}</div><p class="fw-bold mb-1">Huruf yang tersedia:</p><div class="letter-row" id="letterBank">${letters.map((x,n)=>`<button class="letter" data-letter="${n}">${x.l}</button>`).join("")}</div><p class="fw-bold mb-1">Susunan jawaban:</p><div class="letter-row" id="answerBank"><span class="text-muted small">Pilih huruf di atas.</span></div><button id="clearLetters" class="btn btn-outline-secondary btn-sm">Ulangi</button> <button id="checkWord" class="btn btn-primary btn-sm">Periksa</button><div id="scrambleFeedback" class="feedback"></div><button id="nextWord" class="btn btn-outline-primary mt-3 d-none">Lanjut</button>`;
-  $$(".letter").forEach(btn=>btn.addEventListener("click",()=>{
-   if(btn.disabled)return;btn.disabled=true;chosen.push({letter:letters[Number(btn.dataset.letter)].l,index:Number(btn.dataset.letter)});
-   drawAnswer();
-  }));
-  function drawAnswer(){$("#answerBank").innerHTML=chosen.length?chosen.map(x=>`<span class="letter">${x.letter}</span>`).join(""):'<span class="text-muted small">Pilih huruf di atas.</span>';}
-  $("#clearLetters").addEventListener("click",()=>{chosen=[];$$(".letter").forEach(b=>b.disabled=false);drawAnswer();$("#scrambleFeedback").textContent="";});
-  $("#checkWord").addEventListener("click",()=>{
-   const val=chosen.map(x=>x.letter).join("");
-   if(!val){$("#scrambleFeedback").textContent="Pilih huruf terlebih dahulu.";return;}
-   const ok=val===item.word; if(ok)correct++;
-   $("#scrambleFeedback").textContent=ok?"Benar! 🎉":`Belum tepat. Jawabannya: ${item.word}`;
-   $("#scrambleFeedback").style.color=ok?"#218653":"#bd5a50";
-   $("#checkWord").disabled=true;$("#nextWord").classList.remove("d-none");
+
+  $$(".nav-link").forEach(link => {
+    link.classList.toggle("active", link.dataset.page === page);
   });
-  $("#nextWord").addEventListener("click",()=>{if(i<scrambleWords.length-1){i++;render();}else finishGame(correct*10,`Kamu menyusun ${correct} dari ${scrambleWords.length} kata dengan benar.`);});
- }
- render();
+
+  const menu = $("#navMenu");
+
+  if (menu && menu.classList.contains("show")) {
+    bootstrap.Collapse.getOrCreateInstance(menu).hide();
+  }
+
+  if (page === "profile") {
+    renderProfile();
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
-function finishGame(points,message){
- addPoints(points);
- $("#gameContent").innerHTML=`<div class="text-center py-3"><div style="font-size:3.5rem">🏆</div><h2 class="mt-2">Permainan selesai!</h2><p class="text-muted">${message}</p><div class="fact-box d-inline-block"><strong>+${points} poin</strong> ⭐</div><div class="d-flex justify-content-center flex-wrap gap-2 mt-3"><button class="btn btn-primary" id="playAgain">Main Lagi</button><button class="btn btn-outline-primary" id="backToGames">Pilih Game Lain</button></div></div>`;
- $("#playAgain").addEventListener("click",()=>showGame(state.game));
- $("#backToGames").addEventListener("click",()=>{$("#gameArea").classList.add("d-none");});
+
+document.addEventListener("click", event => {
+  const pageLink = event.target.closest("[data-page]");
+  const goButton = event.target.closest("[data-go]");
+
+  if (pageLink) {
+    event.preventDefault();
+    showPage(pageLink.dataset.page);
+  }
+
+  if (goButton) {
+    showPage(goButton.dataset.go);
+  }
+});
+
+
+// ==========================================
+// 2. DATA PERSONALITY DISCOVERY
+// ==========================================
+
+const personalityQuestions = [
+  {
+    question: "Ketika memiliki waktu luang, apa yang paling ingin kamu lakukan?",
+    options: [
+      {
+        text: "Membuat sesuatu, menggambar, atau mencoba ide baru.",
+        type: "creative"
+      },
+      {
+        text: "Mencari informasi atau mempelajari hal menarik.",
+        type: "analytical"
+      },
+      {
+        text: "Bertemu teman dan melakukan kegiatan bersama.",
+        type: "social"
+      },
+      {
+        text: "Menyusun rencana atau mengatur kegiatan.",
+        type: "organized"
+      }
+    ]
+  },
+
+  {
+    question: "Jika mendapatkan tugas kelompok, peran apa yang biasanya kamu pilih?",
+    options: [
+      {
+        text: "Memberikan ide dan membuat konsep.",
+        type: "creative"
+      },
+      {
+        text: "Menganalisis informasi dan mencari solusi.",
+        type: "analytical"
+      },
+      {
+        text: "Berkomunikasi dan membantu anggota kelompok.",
+        type: "social"
+      },
+      {
+        text: "Membagi tugas dan mengatur jadwal.",
+        type: "organized"
+      }
+    ]
+  },
+
+  {
+    question: "Hal apa yang paling membuatmu tertarik?",
+    options: [
+      {
+        text: "Seni, desain, musik, dan hal-hal kreatif.",
+        type: "creative"
+      },
+      {
+        text: "Teknologi, fakta, dan teka-teki.",
+        type: "analytical"
+      },
+      {
+        text: "Hubungan antarmanusia dan kegiatan sosial.",
+        type: "social"
+      },
+      {
+        text: "Perencanaan, target, dan pengelolaan.",
+        type: "organized"
+      }
+    ]
+  },
+
+  {
+    question: "Ketika menghadapi masalah, apa yang biasanya kamu lakukan?",
+    options: [
+      {
+        text: "Mencoba mencari cara yang berbeda.",
+        type: "creative"
+      },
+      {
+        text: "Mencari penyebab dan mempertimbangkan solusi.",
+        type: "analytical"
+      },
+      {
+        text: "Bertanya atau berdiskusi dengan orang lain.",
+        type: "social"
+      },
+      {
+        text: "Membuat langkah-langkah penyelesaian.",
+        type: "organized"
+      }
+    ]
+  },
+
+  {
+    question: "Lingkungan seperti apa yang paling kamu sukai?",
+    options: [
+      {
+        text: "Lingkungan yang bebas untuk bereksperimen.",
+        type: "creative"
+      },
+      {
+        text: "Lingkungan yang menantang untuk berpikir.",
+        type: "analytical"
+      },
+      {
+        text: "Lingkungan yang ramai dan banyak interaksi.",
+        type: "social"
+      },
+      {
+        text: "Lingkungan yang teratur dan terencana.",
+        type: "organized"
+      }
+    ]
+  },
+
+  {
+    question: "Jika mengikuti sebuah kegiatan baru, apa yang paling ingin kamu coba?",
+    options: [
+      {
+        text: "Membuat karya atau proyek kreatif.",
+        type: "creative"
+      },
+      {
+        text: "Mencoba eksperimen atau tantangan logika.",
+        type: "analytical"
+      },
+      {
+        text: "Menjadi bagian dari kegiatan bersama.",
+        type: "social"
+      },
+      {
+        text: "Mengatur jalannya kegiatan.",
+        type: "organized"
+      }
+    ]
+  }
+];
+
+const personalityTypes = {
+  creative: {
+    title: "The Creative Thinker",
+    emoji: "🎨",
+    description:
+      "Kamu cenderung menikmati kebebasan berekspresi, mencoba ide baru, dan menghasilkan sesuatu yang unik.",
+    strengths: [
+      "Imajinasi dan kreativitas",
+      "Kemampuan menuangkan ide",
+      "Berpikir di luar kebiasaan"
+    ],
+    fields: [
+      "Desain dan seni",
+      "Media dan komunikasi",
+      "Industri kreatif"
+    ]
+  },
+
+  analytical: {
+    title: "The Analytical Thinker",
+    emoji: "🔍",
+    description:
+      "Kamu cenderung tertarik memahami sesuatu, mencari informasi, dan menyelesaikan masalah melalui pemikiran logis.",
+    strengths: [
+      "Berpikir kritis",
+      "Analisis dan pemecahan masalah",
+      "Rasa ingin tahu"
+    ],
+    fields: [
+      "Teknologi informasi",
+      "Riset dan analisis data",
+      "Sains dan penelitian"
+    ]
+  },
+
+  social: {
+    title: "The Social Connector",
+    emoji: "🤝",
+    description:
+      "Kamu cenderung menikmati interaksi, komunikasi, dan kegiatan yang melibatkan orang lain.",
+    strengths: [
+      "Komunikasi",
+      "Kerja sama tim",
+      "Kepedulian terhadap orang lain"
+    ],
+    fields: [
+      "Pendidikan",
+      "Komunikasi dan hubungan masyarakat",
+      "Pelayanan dan kegiatan sosial"
+    ]
+  },
+
+  organized: {
+    title: "The Organized Planner",
+    emoji: "📋",
+    description:
+      "Kamu cenderung menyukai keteraturan, perencanaan, dan kegiatan yang memiliki tujuan serta langkah jelas.",
+    strengths: [
+      "Manajemen waktu",
+      "Perencanaan",
+      "Pengorganisasian"
+    ],
+    fields: [
+      "Manajemen dan administrasi",
+      "Bisnis dan manajemen proyek",
+      "Event management"
+    ]
+  }
+};
+
+
+// ==========================================
+// 3. MENJALANKAN PERSONALITY QUIZ
+// ==========================================
+
+let currentQuestion = 0;
+let personalityAnswers = [];
+
+function startPersonalityQuiz() {
+  currentQuestion = 0;
+  personalityAnswers = [];
+
+  $("#personalityQuiz").classList.remove("d-none");
+  $("#personalityResult").classList.add("d-none");
+
+  renderPersonalityQuestion();
 }
-$("#saveName").addEventListener("click",()=>{
- const value=$("#playerName").value.trim();
- if(!value){alert("Masukkan nama panggilan terlebih dahulu.");return;}
- state.name=value;localStorage.setItem("eduplay_name",value);alert("Nama berhasil disimpan!");
+
+function renderPersonalityQuestion() {
+  const question = personalityQuestions[currentQuestion];
+
+  $("#personalityQuestions").innerHTML = `
+    <div class="mb-3">
+      <span class="eyebrow">
+        PERTANYAAN ${currentQuestion + 1} DARI ${personalityQuestions.length}
+      </span>
+
+      <h4 class="fw-bold mt-2">
+        ${question.question}
+      </h4>
+    </div>
+
+    <div class="d-grid gap-3">
+      ${question.options.map((option, index) => `
+        <label class="interest-option">
+          <input
+            type="radio"
+            name="personalityAnswer"
+            value="${option.type}"
+            ${personalityAnswers[currentQuestion] === option.type ? "checked" : ""}
+          >
+
+          <span>${option.text}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+
+  $("#personalityProgress").innerHTML = `
+    <div class="progress" style="height:8px">
+      <div
+        class="progress-bar"
+        style="width:${((currentQuestion + 1) / personalityQuestions.length) * 100}%; background:#7256d8"
+      ></div>
+    </div>
+
+    <p class="small text-muted mt-2">
+      ${currentQuestion + 1} / ${personalityQuestions.length} pertanyaan
+    </p>
+  `;
+
+  $("#prevQuestion").disabled = currentQuestion === 0;
+
+  $("#nextQuestion").classList.toggle(
+    "d-none",
+    currentQuestion === personalityQuestions.length - 1
+  );
+
+  $("#finishPersonality").classList.toggle(
+    "d-none",
+    currentQuestion !== personalityQuestions.length - 1
+  );
+}
+
+
+// Tombol sebelumnya
+
+$("#prevQuestion").addEventListener("click", () => {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    renderPersonalityQuestion();
+  }
 });
-$("#resetScore").addEventListener("click",()=>{
- if(confirm("Yakin ingin mengatur ulang semua poin?")){state.score=0;updateScore();}
+
+
+// Tombol selanjutnya
+
+$("#nextQuestion").addEventListener("click", () => {
+  const selected = $('input[name="personalityAnswer"]:checked');
+
+  if (!selected) {
+    alert("Pilih salah satu jawaban terlebih dahulu.");
+    return;
+  }
+
+  personalityAnswers[currentQuestion] = selected.value;
+
+  currentQuestion++;
+  renderPersonalityQuestion();
 });
-renderCategories();renderMaterials();updateScore();
+
+
+// Tombol lihat hasil
+
+$("#finishPersonality").addEventListener("click", () => {
+  const selected = $('input[name="personalityAnswer"]:checked');
+
+  if (!selected) {
+    alert("Pilih salah satu jawaban terlebih dahulu.");
+    return;
+  }
+
+  personalityAnswers[currentQuestion] = selected.value;
+
+  calculatePersonality();
+});
+
+
+// ==========================================
+// 4. ANALISIS HASIL PERSONALITY
+// ==========================================
+
+function calculatePersonality() {
+  const scores = {
+    creative: 0,
+    analytical: 0,
+    social: 0,
+    organized: 0
+  };
+
+  personalityAnswers.forEach(answer => {
+    scores[answer]++;
+  });
+
+  const sorted = Object.entries(scores).sort(
+    (a, b) => b[1] - a[1]
+  );
+
+  const mainType = sorted[0][0];
+  const result = personalityTypes[mainType];
+
+  state.personalityResult = {
+    type: mainType,
+    title: result.title,
+    date: new Date().toLocaleDateString("id-ID")
+  };
+
+  localStorage.setItem(
+    "eduplay_personality",
+    JSON.stringify(state.personalityResult)
+  );
+
+  $("#personalityQuiz").classList.add("d-none");
+  $("#personalityResult").classList.remove("d-none");
+
+  $("#personalityResult").innerHTML = `
+    <div class="text-center mb-4">
+      <div style="font-size:4rem">${result.emoji}</div>
+
+      <span class="eyebrow">HASIL EKSPLORASI DIRIMU</span>
+
+      <h2 class="fw-bold mt-2">
+        ${result.title}
+      </h2>
+
+      <p class="text-muted">
+        ${result.description}
+      </p>
+    </div>
+
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <div class="fact-box h-100">
+          <h5 class="fw-bold">✨ Kecenderungan Kekuatan</h5>
+
+          <ul class="mb-0">
+            ${result.strengths.map(item => `<li>${item}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="fact-box h-100">
+          <h5 class="fw-bold">🚀 Bidang yang Bisa Dieksplorasi</h5>
+
+          <ul class="mb-0">
+            ${result.fields.map(item => `<li>${item}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="small text-muted mt-4">
+      Hasil ini menggambarkan kecenderungan berdasarkan jawabanmu,
+      bukan label kepribadian permanen atau penilaian psikologis.
+    </p>
+
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <button class="btn btn-primary" id="retryPersonality">
+        Ulangi Tes
+      </button>
+
+      <button class="btn btn-outline-primary" id="goCareer">
+        Jelajahi Skill →
+      </button>
+    </div>
+  `;
+
+  $("#retryPersonality").addEventListener("click", startPersonalityQuiz);
+
+  $("#goCareer").addEventListener("click", () => {
+    showPage("skills");
+  });
+
+  $("#personalityResult").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+// ==========================================
+// 5. DATA MINAT DAN REKOMENDASI KARIER
+// ==========================================
+
+const careerData = {
+  cooking: {
+    name: "Memasak dan Membuat Kue",
+    emoji: "🍳",
+    field: "Kuliner",
+    skills: ["Kreativitas rasa", "Ketelitian", "Manajemen waktu"],
+    jobs: ["Chef", "Pastry Chef", "Baker", "Food Stylist"],
+    challenge: "Coba membuat satu resep sederhana dan dokumentasikan prosesnya."
+  },
+
+  beauty: {
+    name: "Makeup dan Kecantikan",
+    emoji: "💄",
+    field: "Kecantikan",
+    skills: ["Kreativitas visual", "Komunikasi", "Ketelitian"],
+    jobs: ["Makeup Artist", "Beauty Consultant", "Beauty Content Creator"],
+    challenge: "Buat panduan sederhana tentang langkah perawatan atau makeup."
+  },
+
+  design: {
+    name: "Menggambar dan Mendesain",
+    emoji: "🎨",
+    field: "Desain dan Kreatif",
+    skills: ["Komposisi visual", "Ilustrasi", "Pemecahan masalah kreatif"],
+    jobs: ["Graphic Designer", "Illustrator", "UI/UX Designer"],
+    challenge: "Buat desain poster sederhana dengan tema yang kamu sukai."
+  },
+
+  editing: {
+    name: "Mengedit Foto dan Video",
+    emoji: "🎬",
+    field: "Media Digital",
+    skills: ["Storytelling visual", "Kreativitas", "Penguasaan tools digital"],
+    jobs: ["Video Editor", "Content Creator", "Motion Graphic Designer"],
+    challenge: "Buat video pendek berdurasi 30 detik dengan konsep sendiri."
+  },
+
+  tech: {
+    name: "Teknologi dan Komputer",
+    emoji: "💻",
+    field: "Teknologi Informasi",
+    skills: ["Logika", "Pemecahan masalah", "Literasi digital"],
+    jobs: ["Programmer", "Web Developer", "IT Support", "System Analyst"],
+    challenge: "Coba buat halaman website sederhana menggunakan HTML."
+  },
+
+  business: {
+    name: "Berjualan dan Berbisnis",
+    emoji: "💰",
+    field: "Bisnis dan Pemasaran",
+    skills: ["Komunikasi persuasif", "Perencanaan", "Analisis kebutuhan"],
+    jobs: ["Entrepreneur", "Digital Marketer", "Sales Executive", "Business Development"],
+    challenge: "Buat ide produk sederhana beserta target pembelinya."
+  },
+
+  helping: {
+    name: "Mengajar dan Membantu Orang",
+    emoji: "🤝",
+    field: "Pendidikan dan Sosial",
+    skills: ["Empati", "Komunikasi", "Kesabaran"],
+    jobs: ["Guru", "Tutor", "Konselor Pendidikan", "Community Officer"],
+    challenge: "Coba buat materi singkat untuk menjelaskan satu topik kepada teman."
+  },
+
+  photo: {
+    name: "Fotografi dan Membuat Konten",
+    emoji: "📸",
+    field: "Fotografi dan Media",
+    skills: ["Kepekaan visual", "Komposisi", "Observasi"],
+    jobs: ["Photographer", "Photojournalist", "Product Photographer"],
+    challenge: "Ambil lima foto dengan tema yang sama dan buat cerita dari hasilnya."
+  },
+
+  writing: {
+    name: "Menulis dan Bercerita",
+    emoji: "✍️",
+    field: "Komunikasi dan Media",
+    skills: ["Menulis", "Riset informasi", "Storytelling"],
+    jobs: ["Writer", "Copywriter", "Journalist", "Content Writer"],
+    challenge: "Tulis artikel pendek tentang topik yang sedang kamu sukai."
+  },
+
+  event: {
+    name: "Mengatur Acara dan Kegiatan",
+    emoji: "🎤",
+    field: "Event dan Manajemen",
+    skills: ["Organisasi", "Kerja sama tim", "Manajemen waktu"],
+    jobs: ["Event Organizer", "Project Coordinator", "Wedding Planner"],
+    challenge: "Buat rancangan acara kecil lengkap dengan jadwal kegiatannya."
+  },
+
+  craft: {
+    name: "Membuat dan Memperbaiki Sesuatu",
+    emoji: "🔧",
+    field: "Keterampilan Teknis dan Produk",
+    skills: ["Ketelitian", "Keterampilan praktis", "Berpikir sistematis"],
+    jobs: ["Product Designer", "Teknisi", "Maker/Crafter", "Quality Control"],
+    challenge: "Buat atau perbaiki benda sederhana dengan tetap memperhatikan keselamatan."
+  },
+
+  research: {
+    name: "Mencari Tahu dan Menganalisis",
+    emoji: "🔍",
+    field: "Riset dan Analisis",
+    skills: ["Berpikir kritis", "Analisis data", "Rasa ingin tahu"],
+    jobs: ["Research Assistant", "Data Analyst", "Quality Analyst"],
+    challenge: "Pilih satu topik, kumpulkan informasi, lalu buat kesimpulan sederhana."
+  }
+};
+
+
+// ==========================================
+// 6. AKTIVITAS YANG DISUKAI
+// ==========================================
+
+const activityData = {
+  create: {
+    title: "Kreativitas dan Menghasilkan Karya",
+    description: "Kamu menikmati proses menciptakan ide dan menghasilkan sesuatu."
+  },
+
+  solve: {
+    title: "Analisis dan Pemecahan Masalah",
+    description: "Kamu menikmati tantangan berpikir dan mencari solusi."
+  },
+
+  people: {
+    title: "Komunikasi dan Kolaborasi",
+    description: "Kamu menikmati interaksi dan bekerja bersama orang lain."
+  },
+
+  organize: {
+    title: "Perencanaan dan Pengelolaan",
+    description: "Kamu menikmati kegiatan yang membutuhkan perencanaan."
+  }
+};
+
+
+// ==========================================
+// 7. ANALISIS CAREER EXPLORER
+// ==========================================
+
+$("#analyzeCareer").addEventListener("click", () => {
+
+  const selectedInterests = $$('input[name="interest"]:checked')
+    .map(input => input.value);
+
+  const selectedActivity = $('input[name="activity"]:checked');
+
+  $("#careerError").textContent = "";
+
+  if (selectedInterests.length === 0) {
+    $("#careerError").textContent =
+      "Pilih minimal satu hal yang kamu sukai terlebih dahulu.";
+    return;
+  }
+
+  if (!selectedActivity) {
+    $("#careerError").textContent =
+      "Pilih aktivitas yang paling kamu nikmati.";
+    return;
+  }
+
+  const activity = activityData[selectedActivity.value];
+
+  const recommendations = selectedInterests.map(key => {
+    return careerData[key];
+  }).filter(Boolean);
+
+  state.careerResult = {
+    interests: selectedInterests,
+    activity: selectedActivity.value,
+    date: new Date().toLocaleDateString("id-ID")
+  };
+
+  localStorage.setItem(
+    "eduplay_career",
+    JSON.stringify(state.careerResult)
+  );
+
+  displayCareerResults(recommendations, activity);
+});
+
+
+// ==========================================
+// 8. MENAMPILKAN HASIL REKOMENDASI
+// ==========================================
+
+function displayCareerResults(recommendations, activity) {
+
+  const resultArea = $("#careerResults");
+
+  resultArea.classList.remove("d-none");
+
+  resultArea.innerHTML = `
+    <div class="text-center mb-4">
+      <div style="font-size:3.5rem">🌟</div>
+
+      <span class="eyebrow">YOUR DISCOVERY RESULT</span>
+
+      <h2 class="fw-bold mt-2">
+        Ini Potensi yang Bisa Kamu Eksplorasi!
+      </h2>
+
+      <p class="text-muted">
+        Berdasarkan pilihanmu, berikut beberapa bidang
+        keterampilan dan profesi yang bisa kamu pelajari lebih lanjut.
+      </p>
+    </div>
+
+    <div class="fact-box mb-4">
+      <h5 class="fw-bold">🎯 Aktivitas yang Kamu Nikmati</h5>
+      <h4 class="mt-2">${activity.title}</h4>
+      <p class="mb-0">${activity.description}</p>
+    </div>
+
+    <h4 class="fw-bold mb-3">Rekomendasi Bidang dan Skill</h4>
+
+    <div class="row g-3">
+
+      ${recommendations.map(item => `
+        <div class="col-md-6">
+
+          <article class="game-card h-100">
+
+            <div class="game-emoji">${item.emoji}</div>
+
+            <span class="eyebrow">BIDANG YANG BISA DIEKSPLORASI</span>
+
+            <h4 class="fw-bold mt-2">${item.field}</h4>
+
+            <p class="text-muted">${item.name}</p>
+
+            <hr>
+
+            <h6 class="fw-bold">Skill yang Bisa Dikembangkan</h6>
+
+            <ul>
+              ${item.skills.map(skill => `<li>${skill}</li>`).join("")}
+            </ul>
+
+            <h6 class="fw-bold mt-3">Contoh Profesi</h6>
+
+            <div class="d-flex flex-wrap gap-2">
+              ${item.jobs.map(job => `
+                <span class="badge bg-light text-dark p-2">${job}</span>
+              `).join("")}
+            </div>
+
+            <div class="fact-box mt-3">
+              <strong>💡 Tantangan untukmu:</strong>
+              <p class="mb-0 mt-1">${item.challenge}</p>
+            </div>
+
+          </article>
+
+        </div>
+      `).join("")}
+
+    </div>
+
+    <div class="text-center mt-4">
+      <p class="small text-muted">
+        Rekomendasi ini dibuat berdasarkan minat yang kamu pilih.
+        Minat bukan berarti kamu sudah menguasai keterampilan tersebut.
+        Kamu tetap bisa mencoba dan mengembangkannya.
+      </p>
+
+      <button class="btn btn-outline-primary" id="repeatCareer">
+        Ubah Pilihan
+      </button>
+
+      <button class="btn btn-primary" id="goProfile">
+        Lihat Profil Saya
+      </button>
+    </div>
+  `;
+
+  $("#repeatCareer").addEventListener("click", () => {
+    resultArea.classList.add("d-none");
+    $("#interestOptions").scrollIntoView({
+      behavior: "smooth"
+    });
+  });
+
+  $("#goProfile").addEventListener("click", () => {
+    showPage("profile");
+  });
+
+  resultArea.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+// ==========================================
+// 9. PROFIL PENGGUNA
+// ==========================================
+
+function renderProfile() {
+
+  $("#playerName").value = state.name;
+
+  const saved = $("#savedCareerProfile");
+
+  let html = "";
+
+  if (state.personalityResult) {
+    html += `
+      <div class="fact-box mb-3">
+        <span class="eyebrow">PERSONALITY DISCOVERY</span>
+        <h5 class="fw-bold mt-2">
+          ${state.personalityResult.title}
+        </h5>
+        <p class="small text-muted mb-0">
+          Tanggal eksplorasi: ${state.personalityResult.date}
+        </p>
+      </div>
+    `;
+  }
+
+  if (state.careerResult) {
+    const names = state.careerResult.interests
+      .map(key => careerData[key]?.name)
+      .filter(Boolean);
+
+    html += `
+      <div class="fact-box mb-3">
+        <span class="eyebrow">CAREER & SKILL EXPLORER</span>
+        <h5 class="fw-bold mt-2">Minat yang Kamu Pilih</h5>
+        <ul>
+          ${names.map(name => `<li>${name}</li>`).join("")}
+        </ul>
+        <p class="small text-muted mb-0">
+          Tanggal eksplorasi: ${state.careerResult.date}
+        </p>
+      </div>
+    `;
+  }
+
+  if (!html) {
+    html = `
+      <p class="text-muted">
+        Kamu belum memiliki hasil eksplorasi.
+        Yuk, mulai kenali dirimu!
+      </p>
+    `;
+  }
+
+  saved.innerHTML = html;
+}
+
+
+// ==========================================
+// 10. SIMPAN NAMA
+// ==========================================
+
+$("#saveName").addEventListener("click", () => {
+
+  const value = $("#playerName").value.trim();
+
+  if (!value) {
+    alert("Masukkan nama panggilan terlebih dahulu.");
+    return;
+  }
+
+  state.name = value;
+
+  localStorage.setItem("eduplay_name", value);
+
+  alert("Nama berhasil disimpan!");
+
+});
+
+
+// ==========================================
+// 11. INISIALISASI WEBSITE
+// ==========================================
+
+function initializeEduPlay() {
+
+  $("#playerName").value = state.name;
+
+  renderProfile();
+
+  // Personality quiz
+  startPersonalityQuiz();
+
+}
+
+initializeEduPlay();
